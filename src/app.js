@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
-const { verifyToken } = require("./middleware/authMiddleware");
+const { verifyToken, requireRole } = require("./middleware/authMiddleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +23,15 @@ app.get("/", (req, res) => {
 
 // Rutas de autenticación
 app.use("/api/auth", authRoutes);
+
+// Ruta exclusiva para administradores
+app.get("/api/admin", verifyToken, requireRole("admin"), (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Acceso autorizado: usuario administrador",
+    user: req.user,
+  });
+});
 
 // Ruta protegida mediante JWT
 app.get("/api/protected", verifyToken, (req, res) => {
